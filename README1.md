@@ -1,10 +1,10 @@
-# NexaMind – Phase 1: Personal AI Assistant
+# Agentex – Phase 1: Personal AI Assistant
 
 A local-first personal AI assistant powered by **Ollama and Qwen3 4B**, built with Python and Streamlit. Phase 1 establishes the foundation for a privacy-focused AI assistant with persistent conversations, multi-turn interactions, and locally hosted language model inference.
 
 ## Overview
 
-NexaMind is an evolving personal AI assistant designed to run locally without depending on paid LLM APIs.
+Agentex is an evolving personal AI assistant designed to run locally without depending on paid LLM APIs.
 
 Phase 1 focuses on building a reliable conversational assistant that can interact with a locally hosted language model, maintain conversation history, and provide a simple chat interface.
 
@@ -274,13 +274,13 @@ Phase 1 focuses on conversational functionality. The following capabilities are 
 
 ## Future Vision
 
-NexaMind aims to evolve beyond a conventional chatbot into a personal AI agent capable of understanding requests, selecting appropriate tools, executing multi-step tasks, retaining useful context, and assisting with everyday activities.
+Agentex aims to evolve beyond a conventional chatbot into a personal AI agent capable of understanding requests, selecting appropriate tools, executing multi-step tasks, retaining useful context, and assisting with everyday activities.
 
 Phase 1 establishes the conversational foundation. Future phases will progressively introduce agentic capabilities and automation.
 
 ---
 
-**Project:** NexaMind  
+**Project:** Agentex  
 **Current Release:** Phase 1  
 **Architecture:** Local-first AI Assistant  
 **License:** To be determined
