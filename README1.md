@@ -1,4 +1,4 @@
-# NexaMind – Phase 1: Local Personal AI Assistant
+# NexaMind – Phase 1: Personal AI Assistant
 
 A local-first personal AI assistant powered by **Ollama and Qwen3 4B**, built with Python and Streamlit. Phase 1 establishes the foundation for a privacy-focused AI assistant with persistent conversations, multi-turn interactions, and locally hosted language model inference.
 
