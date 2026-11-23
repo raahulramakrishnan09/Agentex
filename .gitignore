@@ -1,0 +1,50 @@
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets
+.env
+
+# Runtime files
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+data/*.log
+data/*.db-wal
+data/*.db-shm
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.bak
+.DS_Store
+
+
+# Additional secrets
+.env.*
+!.env.example
+
+# Database and runtime files (any folder)
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+*.log
+
+# Model files
+*.pt
+*.pth
+*.onnx
+*.safetensors
