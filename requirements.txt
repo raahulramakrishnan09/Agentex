@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 altair==6.3.0
 annotated-types==0.8.0
 anyio==4.16.0
@@ -63,3 +64,13 @@ watchdog==7.1.1
 websockets==17.4
 xxhash==4.1.0
 zstandard==0.25.0
+=======
+# All dependencies are free / open source.
+streamlit>=1.40
+langchain-core>=0.3.60
+langchain-ollama>=0.3.4
+langgraph>=0.3.0
+SQLAlchemy>=2.0
+httpx>=0.27
+pytest>=8.0
+>>>>>>> master

@@ -3,10 +3,16 @@ from dataclasses import dataclass, replace
 import pytest
 
 from agent.agent import Assistant
-from config import load_settings
+from config import load_settings as _load_settings
 from database.db import create_db_engine, init_db
 from llm.ollama_client import OllamaUnavailableError
 from memory.conversation_memory import ConversationMemory
+
+
+
+def load_settings():
+    """Phase 1 behaviour under test: plain chat, agent switched off."""
+    return replace(_load_settings(), agent_enabled=False)
 
 
 @dataclass
@@ -98,3 +104,21 @@ def test_reasoning_is_not_saved_to_history(memory):
     reply = "".join(Assistant(memory, llm=llm, cfg=cfg).respond_stream(cid, "15% of 8500?"))
     assert reply.strip() == "1275"
     assert memory.get_messages(cid)[1].content == "1275"
+
+
+def test_agent_conversation_persists_in_sqlite(memory):
+    from agent.agent import Assistant as AgentAssistant
+    from config import load_settings as real_settings
+    from tests.unit.helpers import ScriptedToolLLM, text_reply, tool_reply
+
+    cid = memory.create_conversation()
+    llm = ScriptedToolLLM([
+        tool_reply("calculator", {"expression": "8500 * 15%"}),
+        text_reply("15% of 8500 is 1275."),
+        text_reply("You asked: Calculate 15% of 8500"),
+    ])
+    assistant = AgentAssistant(memory, llm=llm, cfg=real_settings())
+    assert "1275" in "".join(assistant.respond_stream(cid, "Calculate 15% of 8500"))
+    assert "".join(assistant.respond_stream(cid, "What was my previous question?")).startswith("You asked")
+    assert [(m.role) for m in memory.get_messages(cid)] == ["user", "assistant", "user", "assistant"]
+    assert memory.get_messages(cid)[1].content == "15% of 8500 is 1275."

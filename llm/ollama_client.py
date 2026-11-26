@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterator, Sequence
+import uuid
+from typing import Any, Iterator, Sequence
 
 import httpx
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import AIMessage, BaseMessage
 from langchain_ollama import ChatOllama
 
 from config import Settings, settings
@@ -145,3 +146,46 @@ def stream_chat(
     except Exception as exc:  # noqa: BLE001 - normalise every client failure
         logger.exception("LLM streaming failed")
         raise OllamaUnavailableError(_explain_error(exc, cfg)) from exc
+
+
+def invoke_chat(llm: Any, messages: Sequence[BaseMessage], cfg: Settings = settings) -> AIMessage:
+    """Run one complete (non-streaming) model turn, as used by the agent.
+
+    Reasoning is removed from the text with the same filter as ``stream_chat``;
+    only ``content`` and ``tool_calls`` are read (never ``reasoning_content``).
+    Every tool call is guaranteed to have an id.
+
+    Raises:
+        OllamaUnavailableError: if the server is unreachable or the request fails.
+    """
+    try:
+        raw = llm.invoke(list(messages))
+    except OllamaUnavailableError:
+        raise
+    except Exception as exc:  # noqa: BLE001 - normalise every client failure
+        logger.exception("LLM request failed")
+        raise OllamaUnavailableError(_explain_error(exc, cfg)) from exc
+
+    content = getattr(raw, "content", "")
+    think_filter = ThinkTagFilter(hold_chars=cfg.reasoning_hold_chars)
+    visible = ""
+    if isinstance(content, str) and content:
+        visible = (think_filter.feed(content) + think_filter.flush()).strip()
+        if think_filter.stripped_chars and not cfg.ollama_think:
+            logger.warning(
+                "Removed %d characters of reasoning although thinking is disabled "
+                "(model '%s'). See README: 'Reasoning leakage'.",
+                think_filter.stripped_chars, cfg.ollama_model,
+            )
+
+    tool_calls = []
+    for call in getattr(raw, "tool_calls", None) or []:
+        tool_calls.append(
+            {
+                "name": call.get("name", ""),
+                "args": call.get("args") or {},
+                "id": call.get("id") or f"call_{uuid.uuid4().hex[:12]}",
+                "type": "tool_call",
+            }
+        )
+    return AIMessage(content=visible, tool_calls=tool_calls)

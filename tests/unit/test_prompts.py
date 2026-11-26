@@ -30,3 +30,14 @@ def test_prompt_contains_date():
 def test_no_think_switch_only_when_requested():
     assert get_system_prompt(NOW, no_think=True).endswith("/no_think")
     assert "/no_think" not in get_system_prompt(NOW)
+
+
+def test_tool_rules_appear_only_when_tools_exist():
+    assert "Tools:" not in get_system_prompt(NOW)
+    prompt = get_system_prompt(NOW, tool_hints=["calculator: use it for arithmetic"])
+    assert "Tools:" in prompt and "calculator: use it for arithmetic" in prompt
+    assert "without any tool" in prompt and "write nothing else" in prompt
+
+
+def test_no_think_switch_stays_last_with_tools():
+    assert get_system_prompt(NOW, no_think=True, tool_hints=["x: y"]).endswith("/no_think")

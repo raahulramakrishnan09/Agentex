@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 # Python
 __pycache__/
@@ -48,3 +49,16 @@ data/*.db-shm
 *.pth
 *.onnx
 *.safetensors
+=======
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.venv/
+data/*.db
+data/*.db-journal
+data/*.log*
+data/*.db-wal
+data/*.db-shm
+*.zip
+>>>>>>> master

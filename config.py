@@ -53,6 +53,9 @@ class Settings:
     ollama_keep_alive: str      # how long Ollama keeps the model in RAM after a reply
     max_history_messages: int   # how many past messages are sent to the model
     max_history_chars: int      # character budget for history (keeps prompt inside the context window)
+    agent_enabled: bool         # False = Phase 1 plain chat (no tools, no LangGraph)
+    agent_max_iterations: int   # max model calls per request (loop protection)
+    agent_max_tool_calls_per_turn: int
     db_path: Path
     log_level: str
     log_file: Path
@@ -73,6 +76,9 @@ def load_settings() -> Settings:
         ollama_keep_alive=_get_str("OLLAMA_KEEP_ALIVE", "30m"),
         max_history_messages=_get_int("MAX_HISTORY_MESSAGES", 20),
         max_history_chars=_get_int("MAX_HISTORY_CHARS", 6000),
+        agent_enabled=_get_bool("AGENT_ENABLED", True),
+        agent_max_iterations=max(1, _get_int("AGENT_MAX_ITERATIONS", 5)),
+        agent_max_tool_calls_per_turn=max(1, _get_int("AGENT_MAX_TOOL_CALLS_PER_TURN", 4)),
         db_path=Path(_get_str("ASSISTANT_DB_PATH", str(data_dir / "assistant.db"))),
         log_level=_get_str("LOG_LEVEL", "INFO").upper(),
         log_file=Path(_get_str("ASSISTANT_LOG_FILE", str(data_dir / "assistant.log"))),

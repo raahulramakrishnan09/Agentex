@@ -2,13 +2,19 @@
 from dataclasses import dataclass, replace
 
 from agent.agent import Assistant
-from config import load_settings
+from config import load_settings as _load_settings
 from memory.conversation_memory import Message
 
 LONG_REASONING = (
     "Okay, the user is asking which team he currently plays for. Let me recall the latest info. "
     "Wait, I should double-check. The safest answer is to mention my knowledge cutoff. "
 ) * 40  # ~7,000 characters
+
+
+
+def load_settings():
+    """Phase 1 behaviour under test: plain chat, agent switched off."""
+    return replace(_load_settings(), agent_enabled=False)
 
 
 @dataclass

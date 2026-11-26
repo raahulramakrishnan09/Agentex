@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from agent.agent import Assistant
+from agent.agent import AgentError, AgentEvent, Assistant
 from config import settings
 from database.db import DatabaseError, create_db_engine, init_db
 from llm.ollama_client import OllamaUnavailableError, check_connection
@@ -97,12 +97,23 @@ def render_sidebar(memory: ConversationMemory, current_id: int) -> None:
                 st.rerun()
 
 
-def stream_reply(assistant: Assistant, conversation_id: int, prompt: str):
-    """Yield reply chunks, showing a 'thinking' hint until the first one arrives."""
+def format_event(event: AgentEvent) -> str:
+    """One short, user-facing line per tool step (never reasoning or prompts)."""
+    if event.kind == "tool_call":
+        return f"🔧 Using **{event.name}**: `{event.detail}`"
+    if event.kind == "tool_error":
+        return f"⚠️ **{event.name}** could not complete: {event.detail}"
+    return f"✅ **{event.name}** finished: `{event.detail}`"
+
+
+def stream_reply(assistant: Assistant, conversation_id: int, prompt: str, tool_box):
+    """Yield reply chunks, showing tool steps in ``tool_box`` and a hint until the reply is ready."""
     indicator = st.empty()
     indicator.caption("⏳ Working on it… the reply appears when it is ready (CPU inference can take a while)")
     try:
-        for piece in assistant.respond_stream(conversation_id, prompt):
+        for piece in assistant.respond_stream(
+            conversation_id, prompt, on_event=lambda event: tool_box.caption(format_event(event))
+        ):
             indicator.empty()
             yield piece
     finally:
@@ -128,9 +139,13 @@ def main() -> None:
             st.markdown(prompt)
         with st.chat_message("assistant"):
             try:
-                st.write_stream(stream_reply(assistant, current_id, prompt))
+                tool_box = st.container()  # tool steps appear here; not saved to history
+                st.write_stream(stream_reply(assistant, current_id, prompt, tool_box))
             except ValueError as exc:
                 st.warning(str(exc))
+                return
+            except AgentError as exc:
+                st.error(f"{exc}\n\nYour message was not saved. Try again, or set AGENT_ENABLED=false for plain chat.")
                 return
             except OllamaUnavailableError as exc:
                 st.session_state["conn_status"] = check_connection()
